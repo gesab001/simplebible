@@ -5,6 +5,8 @@ import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -24,8 +26,12 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     BibleJson bibleJson;
-    String bible = null;
     String selectedBook = "";
+    JSONObject bible;
+
+    private RecyclerView recyclerView;
+    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.LayoutManager layoutManager;
 
 
     @Override
@@ -33,11 +39,31 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
+
+        // use this setting to improve performance if you know that changes
+        // in content do not change the layout size of the RecyclerView
+        recyclerView.setHasFixedSize(true);
+
+        // use a linear layout manager
+        layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
+
+        // specify an adapter (see also next example)
+        // specify an adapter (see also next example)
+
+
+
+
+
         final Spinner spinner_books = (Spinner) findViewById(R.id.spinner_books);
         bibleJson = new BibleJson(this){};
         try {
-            bible = loadJSONFromAsset();
+            String bibleString = bibleJson.loadJSONFromAsset();
+            bible = bibleJson.getJsonBible(bibleString);
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
             e.printStackTrace();
         }
 
@@ -69,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void loadChapters(List<String> list){
         Spinner spinner_chapters = (Spinner) findViewById(R.id.spinner_chapters);
-        final TextView textview = (TextView) findViewById(R.id.textview);
+//        final TextView textview = (TextView) findViewById(R.id.textview);
 
         ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_spinner_item, list);
@@ -82,13 +108,17 @@ public class MainActivity extends AppCompatActivity {
                 try{
 
                     JSONArray chapter = bibleJson.getChapter(bible, selectedBook, chapter_number);
-                    textview.setText("");
+                    String[] dataset = new String[chapter.length()];
+
+                    recyclerView.setAdapter(mAdapter);
                     for (int i = 0; i < chapter.length(); i++){
                         JSONObject v = chapter.getJSONObject(i);
                         String verseNumber = Integer.toString(i+1);
                         String verse = v.getString(verseNumber);
-                        textview.append(verse+"\n");
+                        dataset[i] = verse;
                     }
+                    mAdapter = new MyAdapter(dataset);
+                    recyclerView.setAdapter(mAdapter);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -111,22 +141,5 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public String loadJSONFromAsset() throws IOException {
-        String json = "there is nothing";
-        AssetManager am = this.getAssets();
 
-        try {
-            InputStream is = am.open("filename.json");
-            int size = is.available();
-            byte[] buffer = new byte[size];
-            is.read(buffer);
-            is.close();
-            json = new String(buffer, "UTF-8");
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            return "error";
-        }
-        Log.i("json bible: ", json);
-        return json;
-    }
 }

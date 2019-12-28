@@ -1,6 +1,7 @@
 package com.giovannisaberon.simplebible;
 
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -20,10 +21,12 @@ public class BibleJson {
         this.context = context;
     }
 
-    public String loadJSONFromAsset(Context context) {
-        String json = null;
+    public String loadJSONFromAsset() throws IOException {
+        String json = "there is nothing";
+        AssetManager am = context.getAssets();
+
         try {
-            InputStream is = context.getAssets().open("filename.json");
+            InputStream is = am.open("filename.json");
             int size = is.available();
             byte[] buffer = new byte[size];
             is.read(buffer);
@@ -31,7 +34,7 @@ public class BibleJson {
             json = new String(buffer, "UTF-8");
         } catch (IOException ex) {
             ex.printStackTrace();
-            return null;
+            return "error";
         }
         Log.i("json bible: ", json);
         return json;
@@ -47,18 +50,17 @@ public class BibleJson {
         return json;
     }
 
-    public JSONObject getJsonBible(Context context) throws JSONException {
-        JSONObject obj = new JSONObject(this.loadJSONFromAsset(context));
+    public JSONObject getJsonBible(String bible) throws JSONException {
+        JSONObject obj = new JSONObject(bible);
         return obj;
     }
 
-    public JSONObject getBook(String bible, String book) throws JSONException {
-        JSONObject jsonBible = new JSONObject(bible);
+    public JSONObject getBook(JSONObject jsonBible, String book) throws JSONException {
         JSONObject jsonbook = jsonBible.getJSONObject(book);
         return jsonbook;
     }
 
-    public JSONArray getChapter(String bible, String book, String chapter) throws JSONException {
+    public JSONArray getChapter(JSONObject bible, String book, String chapter) throws JSONException {
         JSONObject jsonbook = this.getBook(bible, book);
         JSONArray jsonchapter = jsonbook.getJSONArray(chapter);
         return jsonchapter;
