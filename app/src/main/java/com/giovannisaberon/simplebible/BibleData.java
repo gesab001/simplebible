@@ -31,6 +31,10 @@ public class BibleData {
         return this.word;
     }
 
+    public String getReference(){
+        return this.book+","+Integer.toString(this.chapter)+","+Integer.toString(this.verse);
+    }
+
 
 
 }

@@ -6,9 +6,15 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -95,6 +101,7 @@ public class FullscreenActivity extends AppCompatActivity {
         setContentView(R.layout.activity_fullscreen);
 
         pref = getApplicationContext().getSharedPreferences("MyPref", 0);
+
         final String book = pref.getString("book", null);
 
         final int chapter = pref.getInt("chapter", 0);
@@ -119,8 +126,28 @@ public class FullscreenActivity extends AppCompatActivity {
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
         findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
+        Button favoriteButton = (Button) findViewById(R.id.dummy_button);
+        favoriteButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                // Code here executes on main thread after user presses button
+                BibleData bibleData = new BibleData(book, chapter, verse, word);
+                addToFavorites(bibleData);
+            }
+        });
+
     }
 
+    public void addToFavorites(BibleData bibleData){
+        pref = getApplicationContext().getSharedPreferences("FavoriteVerses", 0);
+        editor = pref.edit();
+        Set<String> set = null;
+        set.add("Jesus");
+        editor.putStringSet("favoriteVerses", set);
+        editor.commit();
+        Log.i("set size", Integer.toString(set.size()));
+
+
+    }
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
