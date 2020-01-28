@@ -1,13 +1,15 @@
 package com.giovannisaberon.simplebible;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
-    private String[] mDataset;
+    private static BibleData[] mDataset;
+    private static VerseAdapterListener listener;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -19,12 +21,25 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         public MyViewHolder(View v) {
             super(v);
             textView =  v.findViewById(R.id.textView);
+
+            v.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    // send selected contact in callback
+                    String verse = textView.getText().toString();
+                    BibleData bibleData = mDataset[getAdapterPosition()];
+                    Log.i("book", bibleData.getBook());
+                    listener.onVerseSelected(bibleData);
+                }
+            });
         }
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public MyAdapter(String[] myDataset) {
-        mDataset = myDataset;
+    public MyAdapter(BibleData[] myDataset, VerseAdapterListener listener) {
+
+        this.mDataset = myDataset;
+        this.listener = listener;
     }
 
     // Create new views (invoked by the layout manager)
@@ -44,7 +59,8 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     public void onBindViewHolder(MyViewHolder holder, int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
-        holder.textView.setText(String.valueOf(position+1)+". " +mDataset[position]);
+        BibleData bibleData = mDataset[position];
+        holder.textView.setText(String.valueOf(position+1)+". " + bibleData.getWord());
 
     }
 
@@ -52,5 +68,9 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     @Override
     public int getItemCount() {
         return mDataset.length;
+    }
+
+    public interface VerseAdapterListener {
+        void onVerseSelected(BibleData bibleData);
     }
 }

@@ -1,6 +1,8 @@
 package com.giovannisaberon.simplebible;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.support.v7.app.AppCompatActivity;
@@ -13,6 +15,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -24,15 +27,31 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MyAdapter.VerseAdapterListener{
     BibleJson bibleJson;
     String selectedBook = "";
+    int selectedChapter = 0;
     JSONObject bible;
-
+    private SharedPreferences pref;  // 0 - for private mode
+    private SharedPreferences.Editor editor;
     private RecyclerView recyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
 
+    @Override
+    public void onVerseSelected(BibleData bibleData) {
+        Toast.makeText(getApplicationContext(), "Selected: " + bibleData.getVerse(), Toast.LENGTH_LONG).show();
+        pref = this.getApplicationContext().getSharedPreferences("MyPref", 0);
+        editor = pref.edit();
+        editor.putString("book", bibleData.getBook() );
+        editor.putInt("chapter", bibleData.getChapter());
+        editor.putInt("verse", bibleData.getVerse());
+        editor.putString("word", bibleData.getWord() );
+
+        editor.commit();
+        Intent intent = new Intent(this, FullscreenActivity.class);
+        startActivity(intent);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,16 +127,23 @@ public class MainActivity extends AppCompatActivity {
                 try{
 
                     JSONArray chapter = bibleJson.getChapter(bible, selectedBook, chapter_number);
-                    String[] dataset = new String[chapter.length()];
+                    BibleData[] dataset = new BibleData[chapter.length()];
 
                     recyclerView.setAdapter(mAdapter);
                     for (int i = 0; i < chapter.length(); i++){
                         JSONObject v = chapter.getJSONObject(i);
                         String verseNumber = Integer.toString(i+1);
                         String verse = v.getString(verseNumber);
-                        dataset[i] = verse;
+                        BibleData bibleData = new BibleData(selectedBook, Integer.parseInt(chapter_number), Integer.parseInt(verseNumber), verse);
+                        dataset[i] = bibleData;
                     }
-                    mAdapter = new MyAdapter(dataset);
+                    MyAdapter.VerseAdapterListener listener = new MyAdapter.VerseAdapterListener() {
+                        @Override
+                        public void onVerseSelected(BibleData bibleData) {
+                           fullScreen(bibleData);
+                        }
+                    };
+                    mAdapter = new MyAdapter(dataset, listener);
                     recyclerView.setAdapter(mAdapter);
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -139,7 +165,24 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+
+
     }
+    public void fullScreen(BibleData bibleData){
+        Toast.makeText(getApplicationContext(), "Selected: " + bibleData.getVerse(), Toast.LENGTH_LONG).show();
+        pref = this.getApplicationContext().getSharedPreferences("MyPref", 0);
+        editor = pref.edit();
+        editor.putString("book", bibleData.getBook() );
+        editor.putInt("chapter", bibleData.getChapter());
+        editor.putInt("verse", bibleData.getVerse());
+        editor.putString("word", bibleData.getWord() );
+
+        editor.commit();
+        Intent intent = new Intent(this, FullscreenActivity.class);
+        startActivity(intent);
+    }
+
+
 
 
 }
