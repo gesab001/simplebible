@@ -121,12 +121,12 @@ public class FullscreenActivity extends AppCompatActivity {
         final int chapter = pref.getInt("chapter", 0);
         final int verse = pref.getInt("verse", 0);
         final String word = pref.getString("word", null);
-
+        final String reference = book + " " + chapter + ":" + verse;
         mVisible = true;
         mControlsView = findViewById(R.id.fullscreen_content_controls);
         mContentView = findViewById(R.id.fullscreen_content);
         TextView textView = (TextView) mContentView;
-        textView.setText(word);
+        textView.setText(word + " " + reference);
 
         // Set up the user interaction to manually show or hide the system UI.
         mContentView.setOnClickListener(new View.OnClickListener() {

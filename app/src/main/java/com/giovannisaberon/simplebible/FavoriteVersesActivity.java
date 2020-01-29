@@ -85,11 +85,14 @@ public class FavoriteVersesActivity extends AppCompatActivity implements MyAdapt
 //                JSONArray chapter = bibleJson.getChapter(bible, book, Integer.toString(chapterNumber));
 //                JSONObject v = chapter.getJSONObject(verse-1);
 //                Log.i("chapter", v.toString());
-                String word = pref.getString(reference, "");
+                String word = pref.getString(reference, null);
 //                Log.i("word", word);
-                BibleData bibleData = new BibleData(book, chapterNumber, verse, word);
-                dataSet[count] = bibleData;
-                count = count + 1;
+               if (word!=null){
+                   BibleData bibleData = new BibleData(book, chapterNumber, verse, word);
+                   dataSet[count] = bibleData;
+                   count = count + 1;
+               }
+
 
 
 
