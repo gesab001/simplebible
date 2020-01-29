@@ -103,7 +103,7 @@ public class FavoriteVersesActivity extends AppCompatActivity implements MyAdapt
                 fullScreen(bibleData);
             }
         };
-        mAdapter = new MyAdapter(dataSet, listener);
+        mAdapter = new MyAdapter(dataSet, listener, this, "favoriteVerses");
         recyclerView.setAdapter(mAdapter);
     }
 

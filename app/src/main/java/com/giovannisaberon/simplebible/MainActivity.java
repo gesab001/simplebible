@@ -153,7 +153,7 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.VerseAd
                            fullScreen(bibleData);
                         }
                     };
-                    mAdapter = new MyAdapter(dataset, listener);
+                    mAdapter = new MyAdapter(dataset, listener, MainActivity.this, "Main");
                     recyclerView.setAdapter(mAdapter);
                 } catch (JSONException e) {
                     e.printStackTrace();
