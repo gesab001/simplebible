@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -58,6 +59,15 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.VerseAd
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Button favorites_button = (Button) findViewById(R.id.favorites_button);
+        favorites_button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                // Code here executes on main thread after user presses button
+                switchToFavorites();
+
+
+            }
+        });
         recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
 
         // use this setting to improve performance if you know that changes
@@ -179,6 +189,11 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.VerseAd
 
         editor.commit();
         Intent intent = new Intent(this, FullscreenActivity.class);
+        startActivity(intent);
+    }
+
+    public void switchToFavorites(){
+        Intent intent = new Intent(this, FavoriteVersesActivity.class);
         startActivity(intent);
     }
 

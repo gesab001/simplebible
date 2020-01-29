@@ -12,6 +12,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -26,7 +31,8 @@ public class FullscreenActivity extends AppCompatActivity {
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
      */
     private static final boolean AUTO_HIDE = true;
-
+    BibleJson bibleJson;
+    JSONObject bible;
     String verse;
     private SharedPreferences pref;  // 0 - for private mode
     private SharedPreferences.Editor editor;
@@ -97,7 +103,15 @@ public class FullscreenActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        bibleJson = new BibleJson(this){};
+        try {
+            String bibleString = bibleJson.loadJSONFromAsset();
+            bible = bibleJson.getJsonBible(bibleString);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         setContentView(R.layout.activity_fullscreen);
 
         pref = getApplicationContext().getSharedPreferences("MyPref", 0);
@@ -138,12 +152,38 @@ public class FullscreenActivity extends AppCompatActivity {
     }
 
     public void addToFavorites(BibleData bibleData){
+        String reference = bibleData.getReference();
         pref = getApplicationContext().getSharedPreferences("FavoriteVerses", 0);
+        JSONArray chapter = null;
+        String word = "";
+        try {
+            chapter = bibleJson.getChapter(bible, bibleData.getBook(),Integer.toString(bibleData.getChapter()));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        JSONObject v = null;
+        try {
+            v = chapter.getJSONObject(bibleData.getVerse()-1);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+//                Log.i("chapter", v.toString());
+        try {
+            word = v.getString(Integer.toString(bibleData.getVerse()));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         editor = pref.edit();
-        Set<String> set = null;
-        set.add("Jesus");
-        editor.putStringSet("favoriteVerses", set);
-        editor.commit();
+        Set<String> set = pref.getStringSet("favoriteVerses", new HashSet<String>());
+        if (set.contains(reference)){
+            Log.i("already exists", reference);
+        }else{
+            set.add(reference);
+            editor.putStringSet("favoriteVerses", set);
+            editor.putString(reference, word);
+            editor.commit();
+        }
+
         Log.i("set size", Integer.toString(set.size()));
 
 

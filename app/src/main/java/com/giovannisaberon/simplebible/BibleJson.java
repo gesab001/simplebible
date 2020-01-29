@@ -36,7 +36,7 @@ public class BibleJson {
             ex.printStackTrace();
             return "error";
         }
-        Log.i("json bible: ", json);
+//        Log.i("json bible: ", json);
         return json;
     }
 
