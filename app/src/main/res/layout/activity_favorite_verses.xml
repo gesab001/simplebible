@@ -7,6 +7,40 @@ android:layout_height="match_parent"
 android:orientation="vertical"
 tools:context=".FavoriteVersesActivity">
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:orientation="horizontal"
+        android:layout_marginBottom="20dp"
+        android:layout_marginTop="20dp">
+
+        <Spinner
+            android:id="@+id/spinner_topics"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:entries="@array/topic_arrays"
+            android:padding="20dp"
+            android:background="@color/colorPrimary" />
+
+        <!--<Spinner-->
+            <!--android:id="@+id/spinner_chapters"-->
+            <!--android:layout_width="100dp"-->
+            <!--android:textAlignment="center"-->
+            <!--android:layout_height="match_parent"-->
+
+            <!--android:padding="20dp"-->
+            <!--android:background="@color/colorAccent"-->
+            <!--/>-->
+
+        <!--<Button-->
+            <!--android:id="@+id/favorites_button"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_weight="1"-->
+            <!--android:text="Favorites" />-->
+
+
+    </LinearLayout>
 <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent">

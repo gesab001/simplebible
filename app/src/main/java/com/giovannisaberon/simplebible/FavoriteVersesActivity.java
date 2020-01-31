@@ -9,6 +9,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.widget.Toast;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -41,6 +42,7 @@ public class FavoriteVersesActivity extends AppCompatActivity implements MyAdapt
         Intent intent = new Intent(this, FullscreenActivity.class);
         startActivity(intent);
     }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,6 +104,8 @@ public class FavoriteVersesActivity extends AppCompatActivity implements MyAdapt
             public void onVerseSelected(BibleData bibleData) {
                 fullScreen(bibleData);
             }
+
+
         };
         mAdapter = new MyAdapter(dataSet, listener, this, "favoriteVerses");
         recyclerView.setAdapter(mAdapter);
@@ -120,4 +124,6 @@ public class FavoriteVersesActivity extends AppCompatActivity implements MyAdapt
         Intent intent = new Intent(this, FullscreenActivity.class);
         startActivity(intent);
     }
+
+
 }

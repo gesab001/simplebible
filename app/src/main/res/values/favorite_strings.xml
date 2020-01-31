@@ -1,0 +1,11 @@
+<resources>
+
+    <string-array name="topic_arrays">
+        <item>All</item>
+        <item>Bible</item>
+        <item>Faith</item>
+        <item>Add a topic</item>
+
+    </string-array>
+
+</resources>
