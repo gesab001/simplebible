@@ -2,11 +2,15 @@ package com.giovannisaberon.simplebible;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -15,7 +19,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class FavoriteVersesActivity extends AppCompatActivity implements MyAdapter.VerseAdapterListener {
@@ -48,7 +54,43 @@ public class FavoriteVersesActivity extends AppCompatActivity implements MyAdapt
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_favorite_verses);
+        final Spinner spinner_topics = (Spinner) findViewById(R.id.spinner_topics);
+        spinner_topics.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                Resources res = getResources();
+                String selectedTopic  = parentView.getItemAtPosition(position).toString();
+                pref = getApplicationContext().getSharedPreferences("FavoriteVerses", 0);
+                Set<String> set = pref.getStringSet(selectedTopic, new HashSet<String>());
+                loadVerses(set);
 
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) {
+                // your code here
+            }
+
+        });
+
+    }
+
+    public void fullScreen(BibleData bibleData){
+        Toast.makeText(getApplicationContext(), "Selected: " + bibleData.getVerse(), Toast.LENGTH_LONG).show();
+        pref = this.getApplicationContext().getSharedPreferences("MyPref", 0);
+        editor = pref.edit();
+        editor.putString("book", bibleData.getBook() );
+        editor.putInt("chapter", bibleData.getChapter());
+        editor.putInt("verse", bibleData.getVerse());
+        editor.putString("word", bibleData.getWord() );
+
+        editor.commit();
+        Intent intent = new Intent(this, FullscreenActivity.class);
+        startActivity(intent);
+    }
+
+    public void loadVerses(Set<String> setofReferences){
         recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
 
         // use this setting to improve performance if you know that changes
@@ -71,7 +113,6 @@ public class FavoriteVersesActivity extends AppCompatActivity implements MyAdapt
         }
 
         pref = getApplicationContext().getSharedPreferences("FavoriteVerses", 0);
-        Set<String> setofReferences = pref.getStringSet("favoriteVerses", new HashSet<String>());
         BibleData[] dataSet = new BibleData[setofReferences.size()];
         int count = 0;
         for(String reference : setofReferences){
@@ -87,13 +128,13 @@ public class FavoriteVersesActivity extends AppCompatActivity implements MyAdapt
 //                JSONArray chapter = bibleJson.getChapter(bible, book, Integer.toString(chapterNumber));
 //                JSONObject v = chapter.getJSONObject(verse-1);
 //                Log.i("chapter", v.toString());
-                String word = pref.getString(reference, null);
+            String word = pref.getString(reference, null);
 //                Log.i("word", word);
-               if (word!=null){
-                   BibleData bibleData = new BibleData(book, chapterNumber, verse, word);
-                   dataSet[count] = bibleData;
-                   count = count + 1;
-               }
+            if (word!=null){
+                BibleData bibleData = new BibleData(book, chapterNumber, verse, word);
+                dataSet[count] = bibleData;
+                count = count + 1;
+            }
 
 
 
@@ -109,20 +150,6 @@ public class FavoriteVersesActivity extends AppCompatActivity implements MyAdapt
         };
         mAdapter = new MyAdapter(dataSet, listener, this, "favoriteVerses");
         recyclerView.setAdapter(mAdapter);
-    }
-
-    public void fullScreen(BibleData bibleData){
-        Toast.makeText(getApplicationContext(), "Selected: " + bibleData.getVerse(), Toast.LENGTH_LONG).show();
-        pref = this.getApplicationContext().getSharedPreferences("MyPref", 0);
-        editor = pref.edit();
-        editor.putString("book", bibleData.getBook() );
-        editor.putInt("chapter", bibleData.getChapter());
-        editor.putInt("verse", bibleData.getVerse());
-        editor.putString("word", bibleData.getWord() );
-
-        editor.commit();
-        Intent intent = new Intent(this, FullscreenActivity.class);
-        startActivity(intent);
     }
 
 

@@ -174,12 +174,12 @@ public class FullscreenActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         editor = pref.edit();
-        Set<String> set = pref.getStringSet("favoriteVerses", new HashSet<String>());
+        Set<String> set = pref.getStringSet("All", new HashSet<String>());
         if (set.contains(reference)){
             Log.i("already exists", reference);
         }else{
             set.add(reference);
-            editor.putStringSet("favoriteVerses", set);
+            editor.putStringSet("All", set);
             editor.putString(reference, word);
             editor.commit();
         }

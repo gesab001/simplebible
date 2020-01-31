@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
@@ -53,13 +54,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
                 deleteButton.setVisibility(View.VISIBLE);
                 addToTopicButton.setVisibility(View.VISIBLE);
 
-                addToTopicButton.setOnClickListener(new View.OnClickListener(){
-                    @Override
-                    public void onClick(View view){
-                        showPopUpDialog();
 
-                    }
-                });
             }else{
                 addButton.setVisibility(View.VISIBLE);
 
@@ -117,16 +112,30 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
                 pref = context.getSharedPreferences("FavoriteVerses", 0);
                 editor = pref.edit();
                 String reference = bibleData.getReference();
-                Set<String> set = pref.getStringSet("favoriteVerses", new HashSet<String>());
-                set.remove(reference);
-                Log.i("delete", reference);
-                editor.remove(reference);
-                editor.putStringSet("favoriteVerses", set);
-                editor.commit();
+
+                Resources res = context.getResources();
+                String[] arraytopics = res.getStringArray(R.array.topic_arrays);
+                for (int i=0; i<arraytopics.length; i++){
+                    String topicname = arraytopics[i];
+                    Set<String> set = pref.getStringSet(topicname, new HashSet<String>());
+                    set.remove(reference);
+                    Log.i("delete from " + topicname, reference);
+                    editor.remove(reference);
+                    editor.putStringSet(topicname, set);
+                    editor.commit();
+                }
+
                 mDataset = ArrayUtils.removeElement(mDataset, bibleData);
                 notifyItemRemoved(position);
                 notifyItemRangeChanged(position, mDataset.length);
             }
+        });
+        holder.addToTopicButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+               showPopUpDialog(bibleData);
+            }
+
         });
 
 
@@ -142,8 +151,10 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         void onVerseSelected(BibleData bibleData);
     }
 
-    public static void showPopUpDialog() {
+    public static void showPopUpDialog(final BibleData bibleData) {
         final ArrayList selectedItems = new ArrayList();  // Where we track the selected items
+        pref = context.getSharedPreferences("FavoriteVerses", 0);
+
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         // Set the dialog title
         builder.setTitle("Pick Topic")
@@ -169,6 +180,27 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
                     public void onClick(DialogInterface dialog, int id) {
                         // User clicked OK, so save the selectedItems results somewhere
                         // or return them to the component that opened the dialog
+                        Log.i("chosen topic", "yes");
+
+                        Resources res = context.getResources();
+                        String[] arraytopics = res.getStringArray(R.array.topic_arrays);
+                        String reference = bibleData.getReference();
+                        for (int x =0; x<selectedItems.size(); x++){
+                            String topicIndex = selectedItems.get(x).toString();
+                            String topicname = arraytopics[Integer.parseInt(topicIndex)];
+                            Log.i("topic", topicname);
+
+                            editor = pref.edit();
+                            Set<String> set = pref.getStringSet(topicname, new HashSet<String>());
+                            if (set.contains(reference)){
+                                Log.i("already exists", reference);
+                            }else{
+                                set.add(reference);
+                                Log.i("reference ", reference);
+                                editor.putStringSet(topicname, set);
+                                editor.commit();
+                            }
+                        }
 
                     }
                 })
@@ -179,6 +211,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
                     }
                 });
 
+        builder.create();
         builder.show();
     }
 
