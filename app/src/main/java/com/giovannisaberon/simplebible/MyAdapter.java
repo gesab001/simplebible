@@ -16,6 +16,9 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -101,7 +104,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
-    public void onBindViewHolder(MyViewHolder holder, final int position) {
+    public void onBindViewHolder(final MyViewHolder holder, final int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         final BibleData bibleData = mDataset[position];
@@ -129,6 +132,8 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
                 notifyItemRemoved(position);
                 notifyItemRangeChanged(position, mDataset.length);
             }
+
+
         });
         holder.addToTopicButton.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -137,6 +142,15 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
             }
 
         });
+
+        holder.addButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                addToFavorites(bibleData, holder.textView.getText().toString());
+            }
+
+        });
+
 
 
     }
@@ -223,6 +237,25 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
     public interface DeleteItem {
         void delete(int position);
+    }
+
+    public void addToFavorites(BibleData bibleData, String word){
+        String reference = bibleData.getReference();
+        pref = context.getSharedPreferences("FavoriteVerses", 0);
+        editor = pref.edit();
+        Set<String> set = pref.getStringSet("All", new HashSet<String>());
+        if (set.contains(reference)){
+            Log.i("already exists", reference);
+        }else{
+            set.add(reference);
+            editor.putStringSet("All", set);
+            editor.putString(reference, word);
+            editor.commit();
+        }
+
+        Log.i("set size", Integer.toString(set.size()));
+
+
     }
 
 }
