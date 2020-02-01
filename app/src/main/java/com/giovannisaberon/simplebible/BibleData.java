@@ -35,6 +35,11 @@ public class BibleData {
         return this.book+","+Integer.toString(this.chapter)+","+Integer.toString(this.verse);
     }
 
+    public String getReferenceQuote(){
+        return this.book+ " " + Integer.toString(this.chapter)+":"+Integer.toString(this.verse);
+    }
+
+
 
 
 }

@@ -36,7 +36,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
 
-
+    
     public static class MyViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
         public TextView textView;
@@ -108,27 +108,16 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         final BibleData bibleData = mDataset[position];
-        holder.textView.setText(String.valueOf(position+1)+". " + bibleData.getWord());
+        if (activityType=="favoriteVerses"){
+            holder.textView.setText(String.valueOf(position+1)+". " + bibleData.getWord() + " " + bibleData.getReferenceQuote());
+
+        }else{
+            holder.textView.setText(String.valueOf(position+1)+". " + bibleData.getWord());
+        }
         holder.deleteButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
-                pref = context.getSharedPreferences("FavoriteVerses", 0);
-                editor = pref.edit();
-                String reference = bibleData.getReference();
-
-                Resources res = context.getResources();
-                String[] arraytopics = res.getStringArray(R.array.topic_arrays);
-                for (int i=0; i<arraytopics.length; i++){
-                    String topicname = arraytopics[i];
-                    Set<String> set = pref.getStringSet(topicname, new HashSet<String>());
-                    set.remove(reference);
-                    Log.i("delete from " + topicname, reference);
-                    editor.remove(reference);
-                    editor.putStringSet(topicname, set);
-                    editor.commit();
-                }
-
-                mDataset = ArrayUtils.removeElement(mDataset, bibleData);
+                deleteFavorite(bibleData);
                 notifyItemRemoved(position);
                 notifyItemRangeChanged(position, mDataset.length);
             }
@@ -146,7 +135,8 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         holder.addButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
-                addToFavorites(bibleData, holder.textView.getText().toString());
+                showPopUpDialog(bibleData);
+
             }
 
         });
@@ -165,10 +155,10 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         void onVerseSelected(BibleData bibleData);
     }
 
-    public static void showPopUpDialog(final BibleData bibleData) {
+
+    public  void showPopUpDialog(final BibleData bibleData) {
         final ArrayList selectedItems = new ArrayList();  // Where we track the selected items
         pref = context.getSharedPreferences("FavoriteVerses", 0);
-
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         // Set the dialog title
         builder.setTitle("Pick Topic")
@@ -202,19 +192,9 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
                         for (int x =0; x<selectedItems.size(); x++){
                             String topicIndex = selectedItems.get(x).toString();
                             String topicname = arraytopics[Integer.parseInt(topicIndex)];
-                            Log.i("topic", topicname);
-
-                            editor = pref.edit();
-                            Set<String> set = pref.getStringSet(topicname, new HashSet<String>());
-                            if (set.contains(reference)){
-                                Log.i("already exists", reference);
-                            }else{
-                                set.add(reference);
-                                Log.i("reference ", reference);
-                                editor.putStringSet(topicname, set);
-                                editor.commit();
-                            }
+                            addToFavoriteTopic(bibleData, topicname);
                         }
+
 
                     }
                 })
@@ -229,8 +209,24 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         builder.show();
     }
 
-    public static void deleteFavorite(int adapterPosition){
+    public static void deleteFavorite(BibleData bibleData){
+        pref = context.getSharedPreferences("FavoriteVerses", 0);
+        editor = pref.edit();
+        String reference = bibleData.getReference();
 
+        Resources res = context.getResources();
+        String[] arraytopics = res.getStringArray(R.array.topic_arrays);
+        for (int i=0; i<arraytopics.length; i++){
+            String topicname = arraytopics[i];
+            Set<String> set = pref.getStringSet(topicname, new HashSet<String>());
+            set.remove(reference);
+            Log.i("delete from " + topicname, reference);
+            editor.remove(reference);
+            editor.putStringSet(topicname, set);
+            editor.commit();
+        }
+
+        mDataset = ArrayUtils.removeElement(mDataset, bibleData);
 
 
     }
@@ -239,7 +235,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         void delete(int position);
     }
 
-    public void addToFavorites(BibleData bibleData, String word){
+    public void addToFavorites(BibleData bibleData){
         String reference = bibleData.getReference();
         pref = context.getSharedPreferences("FavoriteVerses", 0);
         editor = pref.edit();
@@ -249,8 +245,28 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         }else{
             set.add(reference);
             editor.putStringSet("All", set);
-            editor.putString(reference, word);
+            editor.putString(reference, bibleData.getWord());
             editor.commit();
+        }
+
+        Log.i("set size", Integer.toString(set.size()));
+
+
+    }
+
+    public void addToFavoriteTopic(BibleData bibleData, String topicname){
+        String reference = bibleData.getReference();
+        pref = context.getSharedPreferences("FavoriteVerses", 0);
+        editor = pref.edit();
+        Set<String> set = pref.getStringSet(topicname, new HashSet<String>());
+        if (set.contains(reference)){
+            Log.i("already exists", reference);
+        }else{
+            set.add(reference);
+            editor.putStringSet(topicname, set);
+            editor.putString(reference, bibleData.getWord());
+            editor.commit();
+            Log.i(reference + " added to ", topicname);
         }
 
         Log.i("set size", Integer.toString(set.size()));
