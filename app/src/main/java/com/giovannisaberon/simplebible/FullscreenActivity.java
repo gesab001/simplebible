@@ -11,6 +11,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -33,9 +34,17 @@ public class FullscreenActivity extends AppCompatActivity {
     private static final boolean AUTO_HIDE = true;
     BibleJson bibleJson;
     JSONObject bible;
-    String verse;
+    JSONObject bookText;
+    JSONArray chapterText;
+    private BibleData bibleData;
+    private String selectedTopic;
+    private String book;
+    private int chapter;
+    private int verse;
+    private String activityType;
     private SharedPreferences pref;  // 0 - for private mode
     private SharedPreferences.Editor editor;
+    private BibleData[] dataSet;
     /**
      * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
      * user interaction before hiding the system UI.
@@ -115,27 +124,123 @@ public class FullscreenActivity extends AppCompatActivity {
         setContentView(R.layout.activity_fullscreen);
 
         pref = getApplicationContext().getSharedPreferences("MyPref", 0);
+        activityType = pref.getString("activityType", null);
+        Log.i("activityTypeScreen", activityType);
+        if (activityType=="favoriteVerses"){
+            selectedTopic = pref.getString("selectedFavoriteTopic", null);
+            pref = getApplicationContext().getSharedPreferences("FavoriteVerses", 0);
 
-        final String book = pref.getString("book", null);
+            verse = 0;
+            Set<String> setFavoriteReferences = pref.getStringSet(selectedTopic, new HashSet<String>());
+            dataSet = new BibleData[setFavoriteReferences.size()];
+            int count = 0;
+            for(String reference : setFavoriteReferences){
+                Log.i("reference", reference);
+                String[] verseReference = reference.split(",");
+                String book = verseReference[0];
+                int chapterNumber = Integer.parseInt(verseReference[1]);
+                int verse = Integer.parseInt(verseReference[2]);
+                Log.i("book", book);
+                Log.i("chapter", Integer.toString(chapterNumber));
+                Log.i("verse", Integer.toString(verse));
 
-        final int chapter = pref.getInt("chapter", 0);
-        final int verse = pref.getInt("verse", 0);
+//                JSONArray chapter = bibleJson.getChapter(bible, book, Integer.toString(chapterNumber));
+//                JSONObject v = chapter.getJSONObject(verse-1);
+//                Log.i("chapter", v.toString());
+                String word = pref.getString(reference, null);
+//                Log.i("word", word);
+                if (word!=null){
+                    BibleData bibleData = new BibleData(book, chapterNumber, verse, word);
+                    dataSet[count] = bibleData;
+                    count = count + 1;
+                }
+
+
+
+
+            }
+
+        }
+        pref = getApplicationContext().getSharedPreferences("MyPref", 0);
+        book = pref.getString("book", null);
+        try {
+            bookText = bibleJson.getBook(bible, book);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        chapter = pref.getInt("chapter", 0);
+        try {
+            chapterText =bibleJson.getChapter(bible, book, Integer.toString(chapter));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        verse = pref.getInt("verse", 0);
         final String word = pref.getString("word", null);
         final String reference = book + " " + chapter + ":" + verse;
+        bibleData = new BibleData(book, chapter, verse, word);
         mVisible = true;
-        mControlsView = findViewById(R.id.fullscreen_content_controls);
-        mContentView = findViewById(R.id.fullscreen_content);
-        TextView textView = (TextView) mContentView;
-        textView.setText(word + " " + reference);
+        displayVerse(bibleData);
+        if (activityType=="favoriteVerses"){
+            for (int i=0;i<dataSet.length;i++) {
+                if (dataSet[i].equals(bibleData)) {
+                    verse = i;
+                    break;
+                }
+            }
 
-        // Set up the user interaction to manually show or hide the system UI.
-        mContentView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        }
+
+
+
+            // Set up the user interaction to manually show or hide the system UI.
+       // mContentView.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                toggle();
+//            }
+//        });
+
+        mContentView.setOnTouchListener(new OnSwipeTouchListener(FullscreenActivity.this) {
+            public void onSwipeTop() {
+                Toast.makeText(FullscreenActivity.this, "top", Toast.LENGTH_SHORT).show();
+                toggle();
+
+            }
+            public void onSwipeRight() {
+                if (activityType=="favoriteVerses"){
+                    previousFavoriteVerse();
+                    Log.i("previousFavoriteVerse", "previousFavoriteVerse");
+
+                }else{
+                    previousVerse();
+                }
+
+
+
+//                TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(textView, fontminsize, fontmaxsize, 1,
+//                        TypedValue.COMPLEX_UNIT_DIP);
+
+
+
+            }
+            public void onSwipeLeft() {
+                if (activityType=="favoriteVerses"){
+                    nextFavoriteVerse();
+                    Log.i("nextFavoriteVerse", "nextFavoriteVerse");
+                }else{
+                    nextVerse();
+
+                }
+
+//                TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(textView, fontminsize, fontmaxsize, 1,
+//                        TypedValue.COMPLEX_UNIT_DIP);
+            }
+            public void onSwipeBottom() {
+//                Toast.makeText(FullscreenActivity.this, "bottom", Toast.LENGTH_SHORT).show();
                 toggle();
             }
-        });
 
+        });
         // Upon interacting with UI controls, delay any scheduled hide()
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
@@ -239,5 +344,72 @@ public class FullscreenActivity extends AppCompatActivity {
     private void delayedHide(int delayMillis) {
         mHideHandler.removeCallbacks(mHideRunnable);
         mHideHandler.postDelayed(mHideRunnable, delayMillis);
+    }
+
+    private void displayVerse(BibleData bibleData){
+        mControlsView = findViewById(R.id.fullscreen_content_controls);
+        mContentView = findViewById(R.id.fullscreen_content);
+        TextView textView = (TextView) mContentView;
+        textView.setText(bibleData.getWord() + " " + bibleData.getReferenceQuote());
+    }
+
+    private void nextFavoriteVerse(){
+        verse = verse + 1;
+        if (verse>=dataSet.length-1) {
+            verse = dataSet.length - 2;
+        }
+        bibleData = dataSet[verse];
+        displayVerse(bibleData);
+    }
+    private void nextVerse(){
+        verse = verse + 1;
+        if (verse>=chapterText.length()-1) {
+            verse = chapterText.length() - 2;
+        }
+        try {
+
+            String word = bibleJson.getVerse(chapterText, verse);
+            bibleData = new BibleData(book, chapter, verse, word);
+            displayVerse(bibleData);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
+
+        Log.i("swipe left", "swipe left verse " + Integer.toString(verse) );
+        Log.i("activity type", activityType );
+
+    }
+
+    private void previousFavoriteVerse() {
+        verse = verse - 1;
+        if (verse >= dataSet.length - 1) {
+            verse = dataSet.length - 2;
+        }
+        bibleData = dataSet[verse];
+        displayVerse(bibleData);
+
+
+    }
+
+    private void previousVerse(){
+        verse = verse - 1;
+        if (verse < 0) {
+            verse = 0;
+        }
+        try {
+            String word = bibleJson.getVerse(chapterText, verse);
+            bibleData = new BibleData(book, chapter, verse, word);
+            displayVerse(bibleData);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        //                Toast.makeText(FullscreenActivity.this, Integer.toString(verseCount), Toast.LENGTH_SHORT).show();
+
+        Log.i("swipe right", "verse " + Integer.toString(verse) );
+        Log.i("activity type", activityType );
+
     }
 }

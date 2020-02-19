@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.VerseAd
     private RecyclerView.LayoutManager layoutManager;
 
     @Override
-    public void onVerseSelected(BibleData bibleData) {
+    public void onVerseSelected(BibleData bibleData, String activityType) {
         Toast.makeText(getApplicationContext(), "Selected: " + bibleData.getVerse(), Toast.LENGTH_LONG).show();
         pref = this.getApplicationContext().getSharedPreferences("MyPref", 0);
         editor = pref.edit();
@@ -48,6 +48,7 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.VerseAd
         editor.putInt("chapter", bibleData.getChapter());
         editor.putInt("verse", bibleData.getVerse());
         editor.putString("word", bibleData.getWord() );
+        editor.putString("activityType", activityType);
 
         editor.commit();
         Intent intent = new Intent(this, FullscreenActivity.class);
@@ -149,8 +150,8 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.VerseAd
                     }
                     MyAdapter.VerseAdapterListener listener = new MyAdapter.VerseAdapterListener() {
                         @Override
-                        public void onVerseSelected(BibleData bibleData) {
-                           fullScreen(bibleData);
+                        public void onVerseSelected(BibleData bibleData, String activityType) {
+                           fullScreen(bibleData, activityType);
                         }
                     };
                     mAdapter = new MyAdapter(dataset, listener, MainActivity.this, "Main");
@@ -178,7 +179,7 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.VerseAd
 
 
     }
-    public void fullScreen(BibleData bibleData){
+    public void fullScreen(BibleData bibleData, String activityType){
         Toast.makeText(getApplicationContext(), "Selected: " + bibleData.getVerse(), Toast.LENGTH_LONG).show();
         pref = this.getApplicationContext().getSharedPreferences("MyPref", 0);
         editor = pref.edit();
@@ -186,7 +187,7 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.VerseAd
         editor.putInt("chapter", bibleData.getChapter());
         editor.putInt("verse", bibleData.getVerse());
         editor.putString("word", bibleData.getWord() );
-
+        editor.putString("activityType", activityType);
         editor.commit();
         Intent intent = new Intent(this, FullscreenActivity.class);
         startActivity(intent);

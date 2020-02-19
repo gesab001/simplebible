@@ -33,9 +33,10 @@ public class FavoriteVersesActivity extends AppCompatActivity implements MyAdapt
     private RecyclerView recyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
+    private String selectedTopic;
 
     @Override
-    public void onVerseSelected(BibleData bibleData) {
+    public void onVerseSelected(BibleData bibleData, String activityType) {
         Toast.makeText(getApplicationContext(), "Selected: " + bibleData.getVerse(), Toast.LENGTH_LONG).show();
         pref = this.getApplicationContext().getSharedPreferences("MyPref", 0);
         editor = pref.edit();
@@ -43,7 +44,7 @@ public class FavoriteVersesActivity extends AppCompatActivity implements MyAdapt
         editor.putInt("chapter", bibleData.getChapter());
         editor.putInt("verse", bibleData.getVerse());
         editor.putString("word", bibleData.getWord() );
-
+        editor.putString("activityType", activityType);
         editor.commit();
         Intent intent = new Intent(this, FullscreenActivity.class);
         startActivity(intent);
@@ -59,7 +60,7 @@ public class FavoriteVersesActivity extends AppCompatActivity implements MyAdapt
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
                 Resources res = getResources();
-                String selectedTopic  = parentView.getItemAtPosition(position).toString();
+                selectedTopic  = parentView.getItemAtPosition(position).toString();
                 pref = getApplicationContext().getSharedPreferences("FavoriteVerses", 0);
                 Set<String> set = pref.getStringSet(selectedTopic, new HashSet<String>());
                 loadVerses(set);
@@ -76,7 +77,7 @@ public class FavoriteVersesActivity extends AppCompatActivity implements MyAdapt
 
     }
 
-    public void fullScreen(BibleData bibleData){
+    public void fullScreen(BibleData bibleData, String activityType){
         Toast.makeText(getApplicationContext(), "Selected: " + bibleData.getVerse(), Toast.LENGTH_LONG).show();
         pref = this.getApplicationContext().getSharedPreferences("MyPref", 0);
         editor = pref.edit();
@@ -84,7 +85,8 @@ public class FavoriteVersesActivity extends AppCompatActivity implements MyAdapt
         editor.putInt("chapter", bibleData.getChapter());
         editor.putInt("verse", bibleData.getVerse());
         editor.putString("word", bibleData.getWord() );
-
+        editor.putString("activityType", activityType);
+        editor.putString("selectedFavoriteTopic", selectedTopic);
         editor.commit();
         Intent intent = new Intent(this, FullscreenActivity.class);
         startActivity(intent);
@@ -142,8 +144,8 @@ public class FavoriteVersesActivity extends AppCompatActivity implements MyAdapt
         }
         MyAdapter.VerseAdapterListener listener = new MyAdapter.VerseAdapterListener() {
             @Override
-            public void onVerseSelected(BibleData bibleData) {
-                fullScreen(bibleData);
+            public void onVerseSelected(BibleData bibleData, String activityType) {
+                fullScreen(bibleData, activityType);
             }
 
 

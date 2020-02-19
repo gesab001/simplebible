@@ -69,7 +69,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
                     String verse = textView.getText().toString();
                     BibleData bibleData = mDataset[getAdapterPosition()];
                     Log.i("book", bibleData.getBook());
-                    listener.onVerseSelected(bibleData);
+                    listener.onVerseSelected(bibleData, activityType);
                 }
             });
 //
@@ -152,7 +152,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     }
 
     public interface VerseAdapterListener {
-        void onVerseSelected(BibleData bibleData);
+        void onVerseSelected(BibleData bibleData, String activityType);
     }
 
 

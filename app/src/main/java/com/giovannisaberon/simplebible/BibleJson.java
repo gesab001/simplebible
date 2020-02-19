@@ -65,4 +65,11 @@ public class BibleJson {
         JSONArray jsonchapter = jsonbook.getJSONArray(chapter);
         return jsonchapter;
     }
+
+    public String getVerse(JSONArray chapter, int verse) throws JSONException {
+        JSONObject v = chapter.getJSONObject(verse);
+        String verseNumber = Integer.toString(verse+1);
+        String text = v.getString(verseNumber);
+        return text;
+    }
 }
