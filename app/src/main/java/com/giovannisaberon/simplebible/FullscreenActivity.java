@@ -368,12 +368,12 @@ public class FullscreenActivity extends AppCompatActivity {
     private void nextVerse(){
         verse = verse + 1;
         if (verse>=chapterText.length()-1) {
-            verse = chapterText.length() - 2;
+            verse = chapterText.length() - 1;
         }
         try {
 
             String word = bibleJson.getVerse(chapterText, verse);
-            bibleData = new BibleData(book, chapter, verse, word);
+            bibleData = new BibleData(book, chapter, verse+1, word);
             displayVerse(bibleData);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -404,7 +404,7 @@ public class FullscreenActivity extends AppCompatActivity {
         }
         try {
             String word = bibleJson.getVerse(chapterText, verse);
-            bibleData = new BibleData(book, chapter, verse, word);
+            bibleData = new BibleData(book, chapter, verse+1, word);
             displayVerse(bibleData);
         } catch (JSONException e) {
             e.printStackTrace();
