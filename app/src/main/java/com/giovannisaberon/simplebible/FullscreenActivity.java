@@ -126,7 +126,7 @@ public class FullscreenActivity extends AppCompatActivity {
         pref = getApplicationContext().getSharedPreferences("MyPref", 0);
         activityType = pref.getString("activityType", null);
         Log.i("activityTypeScreen", activityType);
-        if (activityType=="favoriteVerses"){
+//        if (activityType=="favoriteVerses"){
             selectedTopic = pref.getString("selectedFavoriteTopic", null);
             pref = getApplicationContext().getSharedPreferences("FavoriteVerses", 0);
 
@@ -160,7 +160,7 @@ public class FullscreenActivity extends AppCompatActivity {
 
             }
 
-        }
+//        }
         pref = getApplicationContext().getSharedPreferences("MyPref", 0);
         book = pref.getString("book", null);
         try {
@@ -180,7 +180,8 @@ public class FullscreenActivity extends AppCompatActivity {
         bibleData = new BibleData(book, chapter, verse, word);
         mVisible = true;
         displayVerse(bibleData);
-        if (activityType=="favoriteVerses"){
+        if (activityType.startsWith("favoriteVerses")){
+
             for (int i=0;i<dataSet.length;i++) {
                 if (dataSet[i].equals(bibleData)) {
                     verse = i;
@@ -207,10 +208,11 @@ public class FullscreenActivity extends AppCompatActivity {
 
             }
             public void onSwipeRight() {
-                if (activityType=="favoriteVerses"){
+                Log.i("swiperight", activityType);
+                if (activityType.startsWith("favoriteVerses")){
                     previousFavoriteVerse();
-                    Log.i("previousFavoriteVerse", "previousFavoriteVerse");
-
+//                    Log.i("previousFavoriteVerse", "previousFavoriteVerse");
+//
                 }else{
                     previousVerse();
                 }
@@ -224,12 +226,14 @@ public class FullscreenActivity extends AppCompatActivity {
 
             }
             public void onSwipeLeft() {
-                if (activityType=="favoriteVerses"){
+                Log.i("activityleft", activityType);
+
+                if (activityType.startsWith("favoriteVerses")){
                     nextFavoriteVerse();
-                    Log.i("nextFavoriteVerse", "nextFavoriteVerse");
+//                    Log.i("nextFavoriteVerse", "nextFavoriteVerse");
                 }else{
                     nextVerse();
-
+//
                 }
 
 //                TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(textView, fontminsize, fontmaxsize, 1,
@@ -356,7 +360,7 @@ public class FullscreenActivity extends AppCompatActivity {
     private void nextFavoriteVerse(){
         verse = verse + 1;
         if (verse>=dataSet.length-1) {
-            verse = dataSet.length - 2;
+            verse = dataSet.length - 1;
         }
         bibleData = dataSet[verse];
         displayVerse(bibleData);
@@ -377,15 +381,15 @@ public class FullscreenActivity extends AppCompatActivity {
 
 
 
-        Log.i("swipe left", "swipe left verse " + Integer.toString(verse) );
-        Log.i("activity type", activityType );
+//        Log.i("swipe left", "swipe left verse " + Integer.toString(verse) );
+//        Log.i("activity type", activityType );
 
     }
 
     private void previousFavoriteVerse() {
         verse = verse - 1;
-        if (verse >= dataSet.length - 1) {
-            verse = dataSet.length - 2;
+        if (verse < 0) {
+            verse = 0;
         }
         bibleData = dataSet[verse];
         displayVerse(bibleData);
@@ -408,8 +412,8 @@ public class FullscreenActivity extends AppCompatActivity {
 
         //                Toast.makeText(FullscreenActivity.this, Integer.toString(verseCount), Toast.LENGTH_SHORT).show();
 
-        Log.i("swipe right", "verse " + Integer.toString(verse) );
-        Log.i("activity type", activityType );
+//        Log.i("swipe right", "verse " + Integer.toString(verse) );
+//        Log.i("activity type", activityType );
 
     }
 }

@@ -123,18 +123,68 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.VerseAd
 
     }
 
+    @Override
+    public void onResume(){
+        super.onResume();
+        // put your code here...
+        Log.i("onResume", "onResume");
+
+        pref = this.getApplicationContext().getSharedPreferences("MyPref", 0);
+        selectedBook = pref.getString("selectedBook", "Genesis");
+        Resources res = getResources();
+        String[] books = res.getStringArray(R.array.book_arrays);
+        int bookPosition =0;
+        for (int x=0; x<books.length; x++){
+            if (books[x].startsWith(selectedBook)){
+                bookPosition = x;
+            }
+        }
+        selectedChapter = pref.getInt("selectedChapter", 1);
+        int[] chapters = res.getIntArray(R.array.chapters);
+        int totalchapters = chapters[bookPosition];
+        List<String> chapter_list = new ArrayList<String>();
+        for(int x=1; x<=totalchapters; x++){
+            chapter_list.add(Integer.toString(x));
+        }
+        loadChapters(chapter_list);
+
+
+    }
+
+    @Override
+    public void onPause(){
+        Log.i("onPause", "onPause");
+        super.onPause();
+
+
+    }
+
+    public void saveSelectedBookAndChapter(String chapter_number){
+        selectedChapter = Integer.parseInt(chapter_number);
+        pref = this.getApplicationContext().getSharedPreferences("MyPref", 0);
+        editor = pref.edit();
+        editor.putString("selectedBook", selectedBook );
+        editor.putInt("selectedChapter", selectedChapter);
+        editor.commit();
+    }
+
     public void loadChapters(List<String> list){
         Spinner spinner_chapters = (Spinner) findViewById(R.id.spinner_chapters);
+        pref = this.getApplicationContext().getSharedPreferences("MyPref", 0);
+        selectedChapter = pref.getInt("selectedChapter", 1);
+
 //        final TextView textview = (TextView) findViewById(R.id.textview);
 
         ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_spinner_item, list);
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner_chapters.setAdapter(dataAdapter);
+        spinner_chapters.setSelection(selectedChapter-1);
         spinner_chapters.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
                 String chapter_number = parentView.getItemAtPosition(position).toString();
+                saveSelectedBookAndChapter(chapter_number);
                 try{
 
                     JSONArray chapter = bibleJson.getChapter(bible, selectedBook, chapter_number);
