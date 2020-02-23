@@ -183,7 +183,7 @@ public class FullscreenActivity extends AppCompatActivity {
         if (activityType.startsWith("favoriteVerses")){
 
             for (int i=0;i<dataSet.length;i++) {
-                if (dataSet[i].equals(bibleData)) {
+                if (dataSet[i].getReferenceQuote().equals(bibleData.getReferenceQuote())) {
                     verse = i;
                     break;
                 }
