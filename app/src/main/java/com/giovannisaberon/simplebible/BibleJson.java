@@ -21,12 +21,12 @@ public class BibleJson {
         this.context = context;
     }
 
-    public String loadJSONFromAsset() throws IOException {
+    public String loadJSONFromAsset(String filename) throws IOException {
         String json = "there is nothing";
         AssetManager am = context.getAssets();
 
         try {
-            InputStream is = am.open("filename.json");
+            InputStream is = am.open(filename);
             int size = is.available();
             byte[] buffer = new byte[size];
             is.read(buffer);

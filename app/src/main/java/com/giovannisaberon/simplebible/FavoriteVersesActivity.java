@@ -27,6 +27,8 @@ import java.util.Set;
 public class FavoriteVersesActivity extends AppCompatActivity implements MyAdapter.VerseAdapterListener {
 
     BibleJson bibleJson;
+    BibleJson topicJson;
+    JSONObject topics;
     JSONObject bible;
     private SharedPreferences pref;  // 0 - for private mode
     private SharedPreferences.Editor editor;
@@ -61,11 +63,19 @@ public class FavoriteVersesActivity extends AppCompatActivity implements MyAdapt
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
                 Resources res = getResources();
                 selectedTopic  = parentView.getItemAtPosition(position).toString();
-                pref = getApplicationContext().getSharedPreferences("FavoriteVerses", 0);
-                Set<String> set = pref.getStringSet(selectedTopic, new HashSet<String>());
-                loadVerses(set);
+                Log.i("selectedtopic", selectedTopic);
+                if (selectedTopic.equals("All")){
+                    pref = getApplicationContext().getSharedPreferences("FavoriteVerses", 0);
+                    Set<String> set = pref.getStringSet(selectedTopic, new HashSet<String>());
+                    loadVerses(set);
+                    Log.i("alltopic", selectedTopic);
+
+                }else{
+                    Log.i("markfinleytopic", selectedTopic);
+                    loadMarkFinelyVerses(selectedTopic);
 
 
+                }
             }
 
             @Override
@@ -92,6 +102,21 @@ public class FavoriteVersesActivity extends AppCompatActivity implements MyAdapt
         startActivity(intent);
     }
 
+    public JSONObject getJsonFile(String filename){
+        BibleJson jsonfile = new BibleJson(this){};
+        JSONObject jsonObject = null;
+        try {
+            String bibleString = jsonfile.loadJSONFromAsset(filename);
+            jsonObject = jsonfile.getJsonBible(bibleString);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return jsonObject;
+    }
+
     public void loadVerses(Set<String> setofReferences){
         recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
 
@@ -104,15 +129,10 @@ public class FavoriteVersesActivity extends AppCompatActivity implements MyAdapt
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(mAdapter);
 
-        bibleJson = new BibleJson(this){};
-        try {
-            String bibleString = bibleJson.loadJSONFromAsset();
-            bible = bibleJson.getJsonBible(bibleString);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        bible = getJsonFile("filename.json");
+        Log.i("biblejson", bible.toString());
+
+
 
         pref = getApplicationContext().getSharedPreferences("FavoriteVerses", 0);
         BibleData[] dataSet = new BibleData[setofReferences.size()];
@@ -152,6 +172,61 @@ public class FavoriteVersesActivity extends AppCompatActivity implements MyAdapt
         };
         mAdapter = new MyAdapter(dataSet, listener, this, "favoriteVerses");
         recyclerView.setAdapter(mAdapter);
+    }
+
+    public void loadMarkFinelyVerses(String topicTitle){
+        recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
+        BibleData[] dataset;
+        // use this setting to improve performance if you know that changes
+        // in content do not change the layout size of the RecyclerView
+        recyclerView.setHasFixedSize(true);
+
+        // use a linear layout manager
+        layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setAdapter(mAdapter);
+        JSONArray jsonarrayreferences = new JSONArray();
+
+        topics = getJsonFile("bibletopics.json");
+        bible = getJsonFile("filename.json");
+        try {
+            jsonarrayreferences = topics.getJSONArray(topicTitle.toLowerCase());
+            dataset = new BibleData[jsonarrayreferences.length()];
+            for (int i =0; i<jsonarrayreferences.length(); i++){
+                try {
+                    JSONObject areferenceobject = (JSONObject) jsonarrayreferences.get(i);
+                    String book = areferenceobject.getString("book");
+
+                    int chapter = Integer.parseInt(areferenceobject.getString("chapter"));
+                    int verse = Integer.parseInt(areferenceobject.getString("verse"))-1;
+                    String verseNumber = Integer.toString(verse+1);
+                    String chapterNumber = Integer.toString(chapter);
+                    String word = bible.getJSONObject(book).getJSONArray(chapterNumber).getJSONObject(verse).getString(verseNumber);
+                    Log.i("word", word.toString());
+                    BibleData bibleData = new BibleData(book, chapter, verse, word);
+                    dataset[i] = bibleData;
+
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+            Log.i("bibletopicsjson", jsonarrayreferences.toString());
+
+            MyAdapter.VerseAdapterListener listener = new MyAdapter.VerseAdapterListener() {
+                @Override
+                public void onVerseSelected(BibleData bibleData, String activityType) {
+                    fullScreen(bibleData, activityType);
+                }
+
+
+            };
+            mAdapter = new MyAdapter(dataset, listener, this, "favoriteVerses");
+            recyclerView.setAdapter(mAdapter);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
     }
 
 

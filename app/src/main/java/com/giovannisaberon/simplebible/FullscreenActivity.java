@@ -114,7 +114,7 @@ public class FullscreenActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         bibleJson = new BibleJson(this){};
         try {
-            String bibleString = bibleJson.loadJSONFromAsset();
+            String bibleString = bibleJson.loadJSONFromAsset("filename.json");
             bible = bibleJson.getJsonBible(bibleString);
         } catch (IOException e) {
             e.printStackTrace();

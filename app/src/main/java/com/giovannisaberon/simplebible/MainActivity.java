@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.VerseAd
         final Spinner spinner_books = (Spinner) findViewById(R.id.spinner_books);
         bibleJson = new BibleJson(this){};
         try {
-            String bibleString = bibleJson.loadJSONFromAsset();
+            String bibleString = bibleJson.loadJSONFromAsset("filename.json");
             bible = bibleJson.getJsonBible(bibleString);
         } catch (IOException e) {
             e.printStackTrace();

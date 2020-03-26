@@ -14,6 +14,11 @@ public class BibleData {
         this.word = word;
     }
 
+    public BibleData(String book, int chapter, int verse){
+        this.book= book;
+        this.chapter = chapter;
+        this.verse = verse;
+    }
 
     public String getBook(){
         return this.book;
