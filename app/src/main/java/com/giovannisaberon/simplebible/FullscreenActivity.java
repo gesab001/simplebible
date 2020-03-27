@@ -127,57 +127,20 @@ public class FullscreenActivity extends AppCompatActivity {
         activityType = pref.getString("activityType", null);
         Log.i("activityTypeScreen", activityType);
 //        if (activityType=="favoriteVerses"){
-            selectedTopic = pref.getString("selectedFavoriteTopic", null);
-            pref = getApplicationContext().getSharedPreferences("FavoriteVerses", 0);
+        selectedTopic = pref.getString("selectedFavoriteTopic", null);
+        pref = getApplicationContext().getSharedPreferences("FavoriteVerses", 0);
 
-            verse = 0;
-            Set<String> setFavoriteReferences = pref.getStringSet(selectedTopic, new HashSet<String>());
-            dataSet = new BibleData[setFavoriteReferences.size()];
-            int count = 0;
-            for(String reference : setFavoriteReferences){
-                Log.i("reference", reference);
-                String[] verseReference = reference.split(",");
-                String book = verseReference[0];
-                int chapterNumber = Integer.parseInt(verseReference[1]);
-                int verse = Integer.parseInt(verseReference[2]);
-                Log.i("book", book);
-                Log.i("chapter", Integer.toString(chapterNumber));
-                Log.i("verse", Integer.toString(verse));
+        verse = 0;
+        Set<String> setFavoriteReferences = pref.getStringSet(selectedTopic, new HashSet<String>());
+        if (setFavoriteReferences.size()==0){
+            Log.i("empty", Integer.toString(setFavoriteReferences.size()));
 
-//                JSONArray chapter = bibleJson.getChapter(bible, book, Integer.toString(chapterNumber));
-//                JSONObject v = chapter.getJSONObject(verse-1);
-//                Log.i("chapter", v.toString());
-                String word = pref.getString(reference, null);
-//                Log.i("word", word);
-                if (word!=null){
-                    BibleData bibleData = new BibleData(book, chapterNumber, verse, word);
-                    dataSet[count] = bibleData;
-                    count = count + 1;
-                }
+            dataSet = bibleJson.loadMarkFinelyVerses(selectedTopic);
 
-
-
-
-            }
-
-//        }
-        pref = getApplicationContext().getSharedPreferences("MyPref", 0);
-        book = pref.getString("book", null);
-        try {
-            bookText = bibleJson.getBook(bible, book);
-        } catch (JSONException e) {
-            e.printStackTrace();
+        }else{
+            dataSet = bibleJson.loadVerses(selectedTopic);
         }
-        chapter = pref.getInt("chapter", 0);
-        try {
-            chapterText =bibleJson.getChapter(bible, book, Integer.toString(chapter));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        verse = pref.getInt("verse", 0);
-        final String word = pref.getString("word", null);
-        final String reference = book + " " + chapter + ":" + verse;
-        bibleData = new BibleData(book, chapter, verse, word);
+        bibleData = loadFirstVerse();
         mVisible = true;
         displayVerse(bibleData);
         if (activityType.startsWith("favoriteVerses")){
@@ -253,11 +216,31 @@ public class FullscreenActivity extends AppCompatActivity {
         favoriteButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // Code here executes on main thread after user presses button
-                BibleData bibleData = new BibleData(book, chapter, verse, word);
                 addToFavorites(bibleData);
             }
         });
 
+    }
+
+    public BibleData loadFirstVerse(){
+        pref = getApplicationContext().getSharedPreferences("MyPref", 0);
+        book = pref.getString("book", null);
+        try {
+            bookText = bibleJson.getBook(bible, book);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        chapter = pref.getInt("chapter", 0);
+        try {
+            chapterText =bibleJson.getChapter(bible, book, Integer.toString(chapter));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        verse = pref.getInt("verse", 0);
+        final String word = pref.getString("word", null);
+        final String reference = book + " " + chapter + ":" + verse;
+        bibleData = new BibleData(book, chapter, verse, word);
+        return bibleData;
     }
 
     public void addToFavorites(BibleData bibleData){
