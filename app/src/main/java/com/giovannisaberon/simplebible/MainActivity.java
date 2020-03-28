@@ -193,7 +193,8 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.VerseAd
         spinner_chapters.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                String chapter_number = parentView.getItemAtPosition(position).toString();;
+                String chapter_number = parentView.getItemAtPosition(position).toString();
+                saveSelectedBookAndChapter(chapter_number);
                 BibleData[] dataset = new BibleData[0];
                 try {
                     dataset = bibleJson.loadChapterVerses(selectedBook, chapter_number);

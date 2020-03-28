@@ -130,7 +130,7 @@ public class FullscreenActivity extends AppCompatActivity {
         selectedTopic = pref.getString("selectedFavoriteTopic", null);
         pref = getApplicationContext().getSharedPreferences("FavoriteVerses", 0);
 
-        verse = 0;
+
         Set<String> setFavoriteReferences = pref.getStringSet(selectedTopic, new HashSet<String>());
         if (setFavoriteReferences.size()==0){
             Log.i("empty", Integer.toString(setFavoriteReferences.size()));
@@ -141,6 +141,7 @@ public class FullscreenActivity extends AppCompatActivity {
             dataSet = bibleJson.loadVerses(selectedTopic);
         }
         bibleData = loadFirstVerse();
+
         mVisible = true;
         displayVerse(bibleData);
         if (activityType.startsWith("favoriteVerses")){
@@ -240,6 +241,7 @@ public class FullscreenActivity extends AppCompatActivity {
         final String word = pref.getString("word", null);
         final String reference = book + " " + chapter + ":" + verse;
         bibleData = new BibleData(book, chapter, verse, word);
+        verse = verse -1;
         return bibleData;
     }
 
