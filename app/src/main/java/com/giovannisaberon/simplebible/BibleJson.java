@@ -130,6 +130,22 @@ public class BibleJson {
         return dataset;
     }
 
+    public BibleData[] loadChapterVerses(String selectedBook, String chapter_number) throws JSONException {
+
+
+        JSONObject bible = getJsonFile("filename.json");
+        JSONArray chapter = bible.getJSONObject(selectedBook).getJSONArray(chapter_number);
+        BibleData[] dataset = new BibleData[chapter.length()];
+        for (int i = 0; i < chapter.length(); i++){
+            JSONObject v = chapter.getJSONObject(i);
+            String verseNumber = Integer.toString(i+1);
+            String verse = v.getString(verseNumber);
+            BibleData bibleData = new BibleData(selectedBook, Integer.parseInt(chapter_number), Integer.parseInt(verseNumber), verse);
+            dataset[i] = bibleData;
+        }
+        return dataset;
+    }
+
     public BibleData[] loadVerses(String selectedTopic){
         SharedPreferences pref = context.getSharedPreferences("FavoriteVerses", 0);
         Set<String> setofReferences = pref.getStringSet(selectedTopic, new HashSet<String>());

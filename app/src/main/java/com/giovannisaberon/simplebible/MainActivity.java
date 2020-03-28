@@ -109,7 +109,8 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.VerseAd
                 for(int x=1; x<=totalchapters; x++){
                     chapter_list.add(Integer.toString(x));
                 }
-                loadChapters(chapter_list);
+
+//                loadChapters(chapter_list);
 
 
             }
@@ -183,25 +184,14 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.VerseAd
         spinner_chapters.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                String chapter_number = parentView.getItemAtPosition(position).toString();
-                saveSelectedBookAndChapter(chapter_number);
-                try{
-
-                    JSONArray chapter = bibleJson.getChapter(bible, selectedBook, chapter_number);
-                    BibleData[] dataset = new BibleData[chapter.length()];
-
-                    recyclerView.setAdapter(mAdapter);
-                    for (int i = 0; i < chapter.length(); i++){
-                        JSONObject v = chapter.getJSONObject(i);
-                        String verseNumber = Integer.toString(i+1);
-                        String verse = v.getString(verseNumber);
-                        BibleData bibleData = new BibleData(selectedBook, Integer.parseInt(chapter_number), Integer.parseInt(verseNumber), verse);
-                        dataset[i] = bibleData;
-                    }
+                String chapter_number = parentView.getItemAtPosition(position).toString();;
+                BibleData[] dataset = new BibleData[0];
+                try {
+                    dataset = bibleJson.loadChapterVerses(selectedBook, chapter_number);
                     MyAdapter.VerseAdapterListener listener = new MyAdapter.VerseAdapterListener() {
                         @Override
                         public void onVerseSelected(BibleData bibleData, String activityType) {
-                           fullScreen(bibleData, activityType);
+                            fullScreen(bibleData, activityType);
                         }
                     };
                     mAdapter = new MyAdapter(dataset, listener, MainActivity.this, "Main");
@@ -209,12 +199,6 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.VerseAd
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-
-
-
-
-
-
             }
 
             @Override
