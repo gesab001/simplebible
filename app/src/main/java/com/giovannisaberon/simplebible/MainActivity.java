@@ -106,11 +106,16 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.VerseAd
                 int totalchapters = chapters[position];
                 selectedBook  = parentView.getItemAtPosition(position).toString();
                 List<String> chapter_list = new ArrayList<String>();
-                for(int x=1; x<=totalchapters; x++){
-                    chapter_list.add(Integer.toString(x));
+                if (totalchapters==1){
+                    chapter_list.add("1");
+                }else{
+                    for(int x=1; x<=totalchapters; x++){
+                        chapter_list.add(Integer.toString(x));
+                    }
                 }
 
-//                loadChapters(chapter_list);
+
+                loadChapters(chapter_list);
 
 
             }
@@ -144,8 +149,12 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.VerseAd
         int[] chapters = res.getIntArray(R.array.chapters);
         int totalchapters = chapters[bookPosition];
         List<String> chapter_list = new ArrayList<String>();
-        for(int x=1; x<=totalchapters; x++){
-            chapter_list.add(Integer.toString(x));
+        if (totalchapters==1){
+            chapter_list.add("1");
+        }else{
+            for(int x=1; x<=totalchapters; x++){
+                chapter_list.add(Integer.toString(x));
+            }
         }
         loadChapters(chapter_list);
 
@@ -180,7 +189,7 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.VerseAd
                 android.R.layout.simple_spinner_item, list);
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner_chapters.setAdapter(dataAdapter);
-        spinner_chapters.setSelection(selectedChapter-1);
+//        spinner_chapters.setSelection(selectedChapter-1);
         spinner_chapters.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
